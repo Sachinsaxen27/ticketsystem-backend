@@ -1,7 +1,7 @@
 const express = require('express')
 const AdminSchema = require('../Schema/AdminSchema')
 const router = express.Router()
-const bcrypt = require("bcrypt")
+const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 const { body, validationResult } = require('express-validator')
 const fetchadmin = require('../Middleware/FetchAdmin')
