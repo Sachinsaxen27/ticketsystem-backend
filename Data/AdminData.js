@@ -92,7 +92,7 @@ router.post("/admin_login", [body('email').isEmail(), body('password').exists()]
 })
 
 // ROUTER 3 FOR GETTING ADMIN ssssDATA
-router.get('/x', fetchadmin, async (req, res) => {
+router.get('/get_admin', fetchadmin, async (req, res) => {
     try {
         const userId = req.user;
         const admin = await AdminSchema.findById(userId).select('-__v')
