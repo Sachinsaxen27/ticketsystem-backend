@@ -9,7 +9,7 @@ const app = express()
 const port = process.env.PORT;
 
 
-app.use(cors({origin:'https://tranquil-bunny-e4c4ae.netlify.app',credentials:true}));
+app.use(cors());
 
 // app.options("*", cors(corsvalue))
 app.use(express.json({ limit: "10mb", extended: true }))
