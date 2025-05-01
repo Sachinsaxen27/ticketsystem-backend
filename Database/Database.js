@@ -1,5 +1,5 @@
 const mongoose = require('mongoose')
-const mongoURI = 'mongodb+srv://sachinsaxenapec:6WtVUNw16x6GjZap@ticketsystem-test.wia0j2o.mongodb.net/?retryWrites=true&w=majority&appName=ticketSystem-test'
+const mongoURI =process.env.MONGO_URI||'mongodb+srv://sachinsaxenapec:6WtVUNw16x6GjZap@ticketsystem-test.wia0j2o.mongodb.net/?retryWrites=true&w=majority&appName=ticketSystem-test'
 const connectTomongo = () => {
     mongoose.connect(mongoURI, {}, console.log("Database is now online"))
 }
