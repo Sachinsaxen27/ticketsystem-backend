@@ -67,12 +67,13 @@ router.get('/all_message', async (req, res) => {
 
 router.get('/get_messages/:userId', async (req, res) => {
     try {
+        console.log(req.params.userId)
         if (req.params.userId) {    
             const userId = req.params.userId;
+            console.log(userId)
             const conversation = await Conversation.find({ participants: userId })
 
             const conversationIds = conversation.map(conv => conv._id);
-            // console.log(conversationIds)
             const messages = await MessageSchema.find({
                 conversationID: { $in: conversationIds }
             }).populate('senderid');

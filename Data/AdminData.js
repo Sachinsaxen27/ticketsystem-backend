@@ -71,6 +71,7 @@ router.post("/admin_login", [body('email').isEmail(), body('password').exists()]
             admin = await MemberSchema.findOne({ email })
             role = 'member'
         }
+        console.log(admin)
         if (!admin) {
             return res.status(500).json({ success, error: "Incorrect information" })
         }
