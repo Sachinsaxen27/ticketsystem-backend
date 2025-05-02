@@ -3,16 +3,13 @@ const MessageSchema = require('../Schema/MessageSchem')
 const router = express.Router()
 const Conversation = require('../Schema/ConversationSchema')
 const mongoose = require('mongoose')
-const AdminSchema =require('../Schema/AdminSchema')
-router.get('/s',async(req,res)=>{
-    const admin=await AdminSchema.find()
-    console.log(admin)
-})
+const AdminSchema = require('../Schema/AdminSchema')
+
 router.post('/send_message', async (req, res) => {
     let success = false
     try {
         const { senderid, senderModel, text, sender, role, userId, adminId } = req.body;
-        const localdate = new Date().toLocaleString('en-IN',{timeZone:"Asia/Kolkata"})
+        const localdate = new Date().toLocaleString('en-IN', { timeZone: "Asia/Kolkata" })
         const [datePart, timePart] = localdate.split(', ');
         const [day, month, year] = datePart.split('/');
         const formatted = `${month}/${day}/${year} ${timePart}`;
@@ -68,7 +65,7 @@ router.get('/all_message', async (req, res) => {
 router.get('/get_messages/:userId', async (req, res) => {
     try {
         console.log(req.params.userId)
-        if (req.params.userId) {    
+        if (req.params.userId) {
             const userId = req.params.userId;
             console.log(userId)
             const conversation = await Conversation.find({ participants: userId })
@@ -79,7 +76,7 @@ router.get('/get_messages/:userId', async (req, res) => {
             }).populate('senderid');
             const ticket = conversation.map(conv => conv.ticket)
             res.status(200).json({ messages, ticket })
-        }else{
+        } else {
             return
         }
     } catch (error) {
@@ -125,45 +122,46 @@ router.get('/countConversation/:id', async (req, res) => {
 
 })
 //! ROUTER 6 FOR GETTING AVERAGE TIME
-        router.get('/Conversation_Average', async (req, res) => {
-            const conversationIds = await Conversation.find()
-            const consarray = []
-            let userMessageTime = []
-            let adminMessageTime = []
-            let conver = 0
-            let resolvedpercentage = 0
-            for (i in conversationIds) {
-                conver += 1
-                if (conversationIds[i].status === 'resolved') {
-                    resolvedpercentage += 1
-                }
-                const message = await MessageSchema.find({ conversationID: conversationIds[i]._id })
-                message.filter((item) => {
-                    if (item.role == 'user' && userMessageTime.length == 0) {
-                        const [datePart, timePart] = item.message.time.split(', ');
-                        const [day, month, year] = datePart.split('/');
-                        const formatted = `${month}/${day}/${year} ${timePart}`;
-                        userMessageTime = formatted
-                    } else if (item.role == 'member' || item.role == 'admin' && adminMessageTime.length == 0) {
-                        const [adminPart, timerParts] = item.message.time.split(', ')
-                        const [days, months, years] = adminPart.split('/');
-                        const formatteds = `${months}/${days}/${years} ${timerParts}`;
-                        adminMessageTime = formatteds
+router.get('/Conversation_Average', async (req, res) => {
+    const conversationIds = await Conversation.find()
+    const consarray = []
+    let userMessageTime = []
+    let adminMessageTime = []
+    let conver = 0
+    let resolvedpercentage = 0
+    for (i in conversationIds) {
+        conver += 1
+        if (conversationIds[i].status === 'resolved') {
+            resolvedpercentage += 1
+        }
+        const message = await MessageSchema.find({ conversationID: conversationIds[i]._id })
+        message.filter((item) => {
+            if (item.role == 'user' && userMessageTime.length == 0) {
+                const [datePart, timePart] = item.message.time.split(', ');
+                const [day, month, year] = datePart.split('/');
+                const formatted = `${month}/${day}/${year} ${timePart}`;
+                userMessageTime = formatted
+            } else if (item.role == 'member' || item.role == 'admin' && adminMessageTime.length == 0) {
+                const [adminPart, timerParts] = item.message.time.split(', ')
+                const [days, months, years] = adminPart.split('/');
+                const formatteds = `${months}/${days}/${years} ${timerParts}`;
+                adminMessageTime = formatteds
 
-                    } else {
-                        return;
-                    }
-                })
+            } else {
+                return;
             }
-            console.log(userMessageTime)
-            console.log(adminMessageTime)
-            const finalpercentage = (Math.floor((resolvedpercentage / conver) * 100))
-            const localuser = new Date(userMessageTime)
-            const localadmin = new Date(adminMessageTime)
-            // console.log(Math.floor((localadmin - localuser) / (1000 * 60 * 60)))
-            const gap = Math.floor(((localadmin - localuser) / 1000) / 2)
-            res.status(200).json({ gap, conver, finalpercentage })
         })
+    }
+    console.log("userMessageTime", userMessageTime)
+    console.log("adminMessageTime", adminMessageTime)
+    const finalpercentage = (Math.floor((resolvedpercentage / conver) * 100))
+    const localuser = new Date(userMessageTime)
+    const localadmin = new Date(adminMessageTime)
+    // console.log(Math.floor((localadmin - localuser) / (1000 * 60 * 60)))
+    const gap = Math.floor(((localadmin - localuser) / 1000) / 2)
+    console.log("gap", gap)
+    res.status(200).json({ gap, conver, finalpercentage })
+})
 //? ROUTER 7 FOR GET ALL THE MISSED CHAT
 router.get('/Missed_chat', async (req, res) => {
     const conversationId = await Conversation.find();
