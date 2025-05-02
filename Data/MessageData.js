@@ -93,7 +93,7 @@ router.get('/All_conversation/:id', async (req, res) => {
         let success = false
         let conversation
         let user
-        console.log(status)
+        console.log(status.length)
         if (status.length > 2) {
             conversation = await Conversation.find({ status: status })
             const conversationIds = conversation.map(conv => conv._id);
