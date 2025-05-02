@@ -49,7 +49,7 @@ router.post('/send_message', async (req, res) => {
         });
     } catch (error) {
         success = false
-        // console.log(error)
+        console.log(error)
         res.status(500).json({ success, error: "Failed to send message" });
     }
 })
