@@ -93,6 +93,7 @@ router.get('/All_conversation/:id', async (req, res) => {
         let success = false
         let conversation
         let user
+        console.log(status)
         if (status.length > 2) {
             conversation = await Conversation.find({ status: status })
             const conversationIds = conversation.map(conv => conv._id);
@@ -123,45 +124,45 @@ router.get('/countConversation/:id', async (req, res) => {
 
 })
 //! ROUTER 6 FOR GETTING AVERAGE TIME
-router.get('/Conversation_Average', async (req, res) => {
-    const conversationIds = await Conversation.find()
-    const consarray = []
-    let userMessageTime = []
-    let adminMessageTime = []
-    let conver = 0
-    let resolvedpercentage = 0
-    for (i in conversationIds) {
-        conver += 1
-        if (conversationIds[i].status === 'resolved') {
-            resolvedpercentage += 1
-        }
-        const message = await MessageSchema.find({ conversationID: conversationIds[i]._id })
-        message.filter((item) => {
-            if (item.role == 'user' && userMessageTime.length == 0) {
-                const [datePart, timePart] = item.message.time.split(', ');
-                const [day, month, year] = datePart.split('/');
-                const formatted = `${month}/${day}/${year} ${timePart}`;
-                userMessageTime = formatted
-            } else if (item.role == 'member' || item.role == 'admin' && adminMessageTime.length == 0) {
-                const [adminPart, timerParts] = item.message.time.split(', ')
-                const [days, months, years] = adminPart.split('/');
-                const formatteds = `${months}/${days}/${years} ${timerParts}`;
-                adminMessageTime = formatteds
+        router.get('/Conversation_Average', async (req, res) => {
+            const conversationIds = await Conversation.find()
+            const consarray = []
+            let userMessageTime = []
+            let adminMessageTime = []
+            let conver = 0
+            let resolvedpercentage = 0
+            for (i in conversationIds) {
+                conver += 1
+                if (conversationIds[i].status === 'resolved') {
+                    resolvedpercentage += 1
+                }
+                const message = await MessageSchema.find({ conversationID: conversationIds[i]._id })
+                message.filter((item) => {
+                    if (item.role == 'user' && userMessageTime.length == 0) {
+                        const [datePart, timePart] = item.message.time.split(', ');
+                        const [day, month, year] = datePart.split('/');
+                        const formatted = `${month}/${day}/${year} ${timePart}`;
+                        userMessageTime = formatted
+                    } else if (item.role == 'member' || item.role == 'admin' && adminMessageTime.length == 0) {
+                        const [adminPart, timerParts] = item.message.time.split(', ')
+                        const [days, months, years] = adminPart.split('/');
+                        const formatteds = `${months}/${days}/${years} ${timerParts}`;
+                        adminMessageTime = formatteds
 
-            } else {
-                return;
+                    } else {
+                        return;
+                    }
+                })
             }
+            console.log(userMessageTime)
+            console.log(adminMessageTime)
+            const finalpercentage = (Math.floor((resolvedpercentage / conver) * 100))
+            const localuser = new Date(userMessageTime)
+            const localadmin = new Date(adminMessageTime)
+            // console.log(Math.floor((localadmin - localuser) / (1000 * 60 * 60)))
+            const gap = Math.floor(((localadmin - localuser) / 1000) / 2)
+            res.status(200).json({ gap, conver, finalpercentage })
         })
-    }
-    console.log(userMessageTime)
-    console.log(adminMessageTime)
-    const finalpercentage = (Math.floor((resolvedpercentage / conver) * 100))
-    const localuser = new Date(userMessageTime)
-    const localadmin = new Date(adminMessageTime)
-    // console.log(Math.floor((localadmin - localuser) / (1000 * 60 * 60)))
-    const gap = Math.floor(((localadmin - localuser) / 1000) / 2)
-    res.status(200).json({ gap, conver, finalpercentage })
-})
 //? ROUTER 7 FOR GET ALL THE MISSED CHAT
 router.get('/Missed_chat', async (req, res) => {
     const conversationId = await Conversation.find();
