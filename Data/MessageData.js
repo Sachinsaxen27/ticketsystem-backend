@@ -170,7 +170,7 @@ router.get('/Conversation_Average', async (req, res) => {
         const resolvedPercentage = totalConversations > 0 ? Math.floor((resolvedCount / totalConversations) * 100) : 0;
 
         res.status(200).json({
-            avgGap,
+            finalgap,
             totalConversations,
             resolvedPercentage
         });
