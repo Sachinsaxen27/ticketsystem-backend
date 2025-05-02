@@ -123,45 +123,62 @@ router.get('/countConversation/:id', async (req, res) => {
 })
 //! ROUTER 6 FOR GETTING AVERAGE TIME
 router.get('/Conversation_Average', async (req, res) => {
-    const conversationIds = await Conversation.find()
-    const consarray = []
-    let userMessageTime = []
-    let adminMessageTime = []
-    let conver = 0
-    let resolvedpercentage = 0
-    for (i in conversationIds) {
-        conver += 1
-        if (conversationIds[i].status === 'resolved') {
-            resolvedpercentage += 1
-        }
-        const message = await MessageSchema.find({ conversationID: conversationIds[i]._id })
-        message.filter((item) => {
-            if (item.role == 'user' && userMessageTime.length == 0) {
-                const [datePart, timePart] = item.message.time.split(', ');
-                const [day, month, year] = datePart.split('/');
-                const formatted = `${month}/${day}/${year} ${timePart}`;
-                userMessageTime = formatted
-            } else if (item.role == 'member' || item.role == 'admin' && adminMessageTime.length == 0) {
-                const [adminPart, timerParts] = item.message.time.split(', ')
-                const [days, months, years] = adminPart.split('/');
-                const formatteds = `${months}/${days}/${years} ${timerParts}`;
-                adminMessageTime = formatteds
+    try {
+        const conversationIds = await Conversation.find();
+        let totalConversations = conversationIds.length;
+        let resolvedCount = 0;
+        let totalGap = 0;
+        let validConversations = 0;
 
-            } else {
-                return;
+        for (const convo of conversationIds) {
+            if (convo.status === 'resolved') {
+                resolvedCount += 1;
             }
-        })
+
+            const messages = await MessageSchema.find({ conversationID: convo._id });
+            let userTime = null;
+            let adminTime = null;
+
+            for (const msg of messages) {
+                if (msg.role === 'user' && !userTime) {
+                    const [datePart, timePart] = msg.message.time.split(', ')
+                    const [day, month, year] = datePart.split('/')
+                    userTime = new Date(`${month}/${day}/${year} ${timePart}`)
+                }
+
+                if ((msg.role === 'admin' || msg.role === 'member') && !adminTime) {
+                    const [datePart, timePart] = msg.message.time.split(', ')
+                    const [day, month, year] = datePart.split('/')
+                    adminTime = new Date(`${month}/${day}/${year} ${timePart}`)
+                }
+
+                if (userTime && adminTime) {
+
+                    break;
+                }
+            }
+
+            if (userTime && adminTime) {
+                const gap = Math.abs(adminTime - userTime) / 1000
+                totalGap += gap;
+                validConversations += 1;
+            }
+        }
+
+        const avgGapInSeconds = validConversations > 0 ? Math.floor(totalGap / validConversations) : 0;
+        const resolvedPercentage = totalConversations > 0 ? Math.floor((resolvedCount / totalConversations) * 100) : 0;
+
+        res.status(200).json({
+            avgGapInSeconds,
+            totalConversations,
+            resolvedPercentage
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Internal server error' });
     }
-    console.log("userMessageTime", userMessageTime)
-    console.log("adminMessageTime", adminMessageTime)
-    const finalpercentage = (Math.floor((resolvedpercentage / conver) * 100))
-    const localuser = new Date(userMessageTime)
-    const localadmin = new Date(adminMessageTime)
-    // console.log(Math.floor((localadmin - localuser) / (1000 * 60 * 60)))
-    const gap = Math.floor(((localadmin - localuser) / 1000) / 2)
-    console.log("gap", gap)
-    res.status(200).json({ gap, conver, finalpercentage })
-})
+});
+
 //? ROUTER 7 FOR GET ALL THE MISSED CHAT
 router.get('/Missed_chat', async (req, res) => {
     const conversationId = await Conversation.find();
