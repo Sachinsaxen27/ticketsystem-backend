@@ -12,7 +12,7 @@ router.post('/send_message', async (req, res) => {
     let success = false
     try {
         const { senderid, senderModel, text, sender, role, userId, adminId } = req.body;
-        const localdate = new Date().toLocaleString()
+        const localdate = new Date().toLocaleString('en-IN',{timeZone:"Asia/Kolkata"})
         const [datePart, timePart] = localdate.split(', ');
         const [day, month, year] = datePart.split('/');
         const formatted = `${month}/${day}/${year} ${timePart}`;
