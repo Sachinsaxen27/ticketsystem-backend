@@ -183,31 +183,23 @@ router.get('/Conversation_Average', async (req, res) => {
 //? ROUTER 7 FOR GET ALL THE MISSED CHAT
 router.get('/Missed_chat', async (req, res) => {
     const conversations = await Conversation.find();
-    let missedChatsPerDay = {};
+    let missedchat = {};
 
     for (const convo of conversations) {
-        const userMsgs = await MessageSchema.find({
-            conversationID: convo._id,
-            role: 'user'
-        }).sort({ timestamp: -1 });
+        const userFirstmessage = await MessageSchema.find({conversationID: convo._id,role: 'user'}).sort({ timestamp: -1 });
+        const adminfirst = await MessageSchema.find({conversationID: convo._id,role: { $in: ['admin', 'member'] }}).sort({ timestamp: 1 });
+        if (userFirstmessage.length === 0 || adminfirst.length === 0) continue;
 
-        const adminMsgs = await MessageSchema.find({
-            conversationID: convo._id,
-            role: { $in: ['admin', 'member'] }
-        }).sort({ timestamp: 1 });
+        const lastuser = userFirstmessage[0];
+        const firstadmin = adminfirst.find(msg => msg.timestamp > lastuser.timestamp);
 
-        if (userMsgs.length === 0 || adminMsgs.length === 0) continue;
+        if (!firstadmin) continue;
 
-        const latestUserMsg = userMsgs[0];
-        const firstAdminMsg = adminMsgs.find(msg => msg.timestamp > latestUserMsg.timestamp);
-
-        if (!firstAdminMsg) continue;
-
-        const diffHours = (firstAdminMsg.timestamp - latestUserMsg.timestamp) / (1000 * 60 * 60);
+        const diffHours = (firstadmin.timestamp - lastuser.timestamp) / (1000 * 60 * 60);
 
         if (diffHours >= 3) {
-            const userDate = latestUserMsg.timestamp.toISOString().split('T')[0];
-            missedChatsPerDay[userDate] = (missedChatsPerDay[userDate] || 0) + 1;
+            const userDate = lastuser.timestamp.toISOString().split('T')[0];
+            missedchat[userDate] = (missedchat[userDate] || 0) + 1;
         }
     }
 
