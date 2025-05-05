@@ -183,6 +183,7 @@ router.get('/Conversation_Average', async (req, res) => {
 //? ROUTER 7 FOR GET ALL THE MISSED CHAT
 router.get('/Missed_chat', async (req, res) => {
     const conversationId = await Conversation.find();
+    console.log(conversationId.length)
     let missedChatsPerDay = {};
 
     for (let i = 0; i < conversationId.length; i++) {
@@ -198,7 +199,6 @@ router.get('/Missed_chat', async (req, res) => {
             day = day.padStart(2, '0')
             month = month.padStart(2, '0')
             userDate = `${year}-${month}-${day}`;
-            console.log(userDate)
         }
 
         let missed = false;
@@ -211,8 +211,7 @@ router.get('/Missed_chat', async (req, res) => {
         if (userReply.length > 0 && finalAdminReply.length > 0) {
             const userTime = new Date(`${month}/${day}/${year} ${userReply[0].message.time.split(', ')[1]}`);
             const adminTime = new Date(`${month}/${day}/${year} ${finalAdminReply[0].message.time.split(', ')[1]}`);
-            console.log("user",userTime)
-            console.log("Admin",adminTime)
+            
             if ((adminTime - userTime) / (1000 * 60 * 60) >= 3) {
                 missed = true;
             }
