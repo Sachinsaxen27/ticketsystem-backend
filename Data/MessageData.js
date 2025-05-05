@@ -183,13 +183,12 @@ router.get('/Conversation_Average', async (req, res) => {
 //? ROUTER 7 FOR GET ALL THE MISSED CHAT
 router.get('/Missed_chat', async (req, res) => {
     const conversationId = await Conversation.find();
-    console.log(conversationId.length)
     let missedChatsPerDay = {};
 
     for (let i = 0; i < conversationId.length; i++) {
         const conversation = conversationId[i];
-        const adminReply = await MessageSchema.find({ conversationID: conversation._id, role: 'member' });
-        const userReply = await MessageSchema.find({ conversationID: conversation._id, role: 'user' });
+        const adminReply = await MessageSchema.find({ conversationID: conversation._id, role: 'member' }).sort({timestamp:-1});
+        const userReply = (await MessageSchema.find({ conversationID: conversation._id, role: 'user' })).sort({timestamp:1});
 
         let userDate;
         let day, month, year;
