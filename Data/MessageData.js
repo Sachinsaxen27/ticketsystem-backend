@@ -203,7 +203,7 @@ router.get('/Missed_chat', async (req, res) => {
         }
     }
 
-    res.status(200).json(Object.entries(missedChatsPerDay).map(([date, count]) => ({ date, count })));
+    res.status(200).json(Object.entries(missedchat).map(([date, count]) => ({ date, count })));
 });
 
 
